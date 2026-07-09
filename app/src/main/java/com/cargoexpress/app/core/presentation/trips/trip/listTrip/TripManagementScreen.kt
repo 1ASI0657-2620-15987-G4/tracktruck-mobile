@@ -30,8 +30,10 @@ import com.cargoexpress.app.core.data.repository.OngoingTripRepository
 import com.cargoexpress.app.core.data.repository.TripRepository
 import com.cargoexpress.app.core.domain.Trip
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,7 +100,7 @@ fun TripManagementScreen(
         DatePickerDialog(
             onDismissRequest = { showFromPicker = false },
             confirmButton = {
-                TextButton(onClick = { fromDateMillis = fromPickerState.selectedDateMillis; showFromPicker = false }) { Text("Aceptar") }
+                TextButton(onClick = { fromDateMillis = fromPickerState.selectedDateMillis?.let { normalizeDatePickerMillis(it) }; showFromPicker = false }) { Text("Aceptar") }
             },
             dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Cancelar") } }
         ) { DatePicker(state = fromPickerState) }
@@ -109,7 +111,7 @@ fun TripManagementScreen(
         DatePickerDialog(
             onDismissRequest = { showToPicker = false },
             confirmButton = {
-                TextButton(onClick = { toDateMillis = toPickerState.selectedDateMillis; showToPicker = false }) { Text("Aceptar") }
+                TextButton(onClick = { toDateMillis = toPickerState.selectedDateMillis?.let { normalizeDatePickerMillis(it) }; showToPicker = false }) { Text("Aceptar") }
             },
             dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Cancelar") } }
         ) { DatePicker(state = toPickerState) }
@@ -531,4 +533,16 @@ private fun parseIsoToMillis(isoDate: String): Long? {
     return try {
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(isoDate)?.time
     } catch (_: Exception) { null }
+}
+
+private fun normalizeDatePickerMillis(utcMillis: Long): Long {
+    val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = utcMillis }
+    return Calendar.getInstance().apply {
+        clear()
+        set(
+            utcCalendar.get(Calendar.YEAR),
+            utcCalendar.get(Calendar.MONTH),
+            utcCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }.timeInMillis
 }

@@ -27,8 +27,10 @@ import com.cargoexpress.app.core.common.SelectedLogHolder
 import com.cargoexpress.app.core.data.repository.AuditLogRepository
 import com.cargoexpress.app.core.domain.AuditLog
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +89,7 @@ fun HistoryScreen(
         DatePickerDialog(
             onDismissRequest = { showFromPicker = false },
             confirmButton = {
-                TextButton(onClick = { fromDateMillis = state.selectedDateMillis; showFromPicker = false }) { Text("Aceptar") }
+                TextButton(onClick = { fromDateMillis = state.selectedDateMillis?.let { normalizeDatePickerMillis(it) }; showFromPicker = false }) { Text("Aceptar") }
             },
             dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Cancelar") } }
         ) { DatePicker(state = state) }
@@ -98,7 +100,7 @@ fun HistoryScreen(
         DatePickerDialog(
             onDismissRequest = { showToPicker = false },
             confirmButton = {
-                TextButton(onClick = { toDateMillis = state.selectedDateMillis; showToPicker = false }) { Text("Aceptar") }
+                TextButton(onClick = { toDateMillis = state.selectedDateMillis?.let { normalizeDatePickerMillis(it) }; showToPicker = false }) { Text("Aceptar") }
             },
             dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Cancelar") } }
         ) { DatePicker(state = state) }
@@ -446,4 +448,16 @@ fun parseTimestampToMillis(timestamp: String): Long? {
         } catch (_: Exception) {}
     }
     return null
+}
+
+private fun normalizeDatePickerMillis(utcMillis: Long): Long {
+    val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = utcMillis }
+    return Calendar.getInstance().apply {
+        clear()
+        set(
+            utcCalendar.get(Calendar.YEAR),
+            utcCalendar.get(Calendar.MONTH),
+            utcCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }.timeInMillis
 }
