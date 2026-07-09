@@ -253,7 +253,7 @@ fun VehicleListScreen(viewModel: VehicleListViewModel, navController: NavControl
                         val vehicle = sorted[index]
                         VehicleItem(
                             vehicle = vehicle,
-                            onEditClick = if (vehicle.state != "INACTIVE") {
+                            onEditClick = if (vehicle.state == "AVAILABLE") {
                                 { navController.navigate("edit_vehicle/${vehicle.id}") }
                             } else null,
                             onStateChangeClick = {
@@ -326,18 +326,20 @@ fun VehicleItem(
                         Icon(imageVector = Icons.Filled.Edit, contentDescription = "Editar vehículo", tint = Color(0xFFF9A825))
                     }
                 }
-                IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
-                    if (vehicle.state == "INACTIVE") {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Restaurar vehículo",
-                            tint = Color(0xFF2E7D32)
-                        )
-                    } else {
+                if (vehicle.state == "AVAILABLE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Desactivar vehículo",
                             tint = Color(0xFFE65100)
+                        )
+                    }
+                } else if (vehicle.state == "INACTIVE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Reactivar vehículo",
+                            tint = Color(0xFF2E7D32)
                         )
                     }
                 }

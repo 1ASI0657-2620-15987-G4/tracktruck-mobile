@@ -246,7 +246,7 @@ fun DriverListScreen(viewModel: DriverListViewModel, navController: NavControlle
                         val driver = sorted[index]
                         DriverItem(
                             driver = driver,
-                            onEditClick = if (driver.state != "INACTIVE") {
+                            onEditClick = if (driver.state == "AVAILABLE") {
                                 { navController.navigate("edit_driver/${driver.id}") }
                             } else null,
                             onStateChangeClick = {
@@ -313,18 +313,20 @@ fun DriverItem(
                         Icon(imageVector = Icons.Filled.Edit, contentDescription = "Editar conductor", tint = Color(0xFFF9A825))
                     }
                 }
-                IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
-                    if (driver.state == "INACTIVE") {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Restaurar conductor",
-                            tint = Color(0xFF2E7D32)
-                        )
-                    } else {
+                if (driver.state == "AVAILABLE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Desactivar conductor",
                             tint = Color(0xFFE65100)
+                        )
+                    }
+                } else if (driver.state == "INACTIVE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Reactivar conductor",
+                            tint = Color(0xFF2E7D32)
                         )
                     }
                 }
