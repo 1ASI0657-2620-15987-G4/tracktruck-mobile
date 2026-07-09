@@ -62,6 +62,7 @@ fun TripManagementScreen(
     var sortAscending by remember { mutableStateOf(true) }
     var fromDateMillis by remember { mutableStateOf<Long?>(null) }
     var toDateMillis by remember { mutableStateOf<Long?>(null) }
+    var dateFilterField by remember { mutableStateOf("LOAD") }
     var showFromPicker by remember { mutableStateOf(false) }
     var showToPicker by remember { mutableStateOf(false) }
     var showExtraFilters by remember { mutableStateOf(false) }
@@ -70,20 +71,21 @@ fun TripManagementScreen(
     val dateDisplayFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val allTrips = uiState.data ?: emptyList()
-    val displayedTrips = remember(allTrips, appliedNameQuery, selectedType, selectedStatus, fromDateMillis, toDateMillis, sortAscending) {
+    val displayedTrips = remember(allTrips, appliedNameQuery, selectedType, selectedStatus, fromDateMillis, toDateMillis, dateFilterField, sortAscending) {
         allTrips
             .filter { trip ->
                 val nameMatch = appliedNameQuery.isBlank() || trip.name.contains(appliedNameQuery, ignoreCase = true)
                 val typeMatch = selectedType.isBlank() || trip.type == selectedType
                 val statusMatch = tripStateToLabel(trip.state) == selectedStatus
                 val dateMatch = run {
-                    val loadMs = parseIsoToMillis(trip.loadDate)
+                    val referenceDate = if (dateFilterField == "UNLOAD") trip.unloadDate else trip.loadDate
+                    val tripMs = parseIsoToMillis(referenceDate)
                     val from = fromDateMillis
                     val to = toDateMillis?.plus(86399999L)
                     when {
-                        from != null && to != null -> loadMs != null && loadMs in from..to
-                        from != null -> loadMs != null && loadMs >= from
-                        to != null -> loadMs != null && loadMs <= to
+                        from != null && to != null -> tripMs != null && tripMs in from..to
+                        from != null -> tripMs != null && tripMs >= from
+                        to != null -> tripMs != null && tripMs <= to
                         else -> true
                     }
                 }
@@ -218,6 +220,43 @@ fun TripManagementScreen(
                                     DropdownMenuItem(text = { Text(t) }, onClick = { selectedType = t; typeExpanded = false })
                                 }
                             }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterChip(
+                                selected = dateFilterField == "LOAD",
+                                onClick = { dateFilterField = "LOAD" },
+                                label = {
+                                    Text(
+                                        "Fecha de carga",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp)
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFFFFEB3B),
+                                    selectedLabelColor = Color.Black
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = dateFilterField == "UNLOAD",
+                                onClick = { dateFilterField = "UNLOAD" },
+                                label = {
+                                    Text(
+                                        "Fecha de descarga",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp)
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFFFFEB3B),
+                                    selectedLabelColor = Color.Black
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
                         }
 
                         Row(
