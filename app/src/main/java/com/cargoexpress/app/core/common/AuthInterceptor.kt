@@ -9,7 +9,7 @@ class AuthInterceptor(private val token: String) : Interceptor {
 
         // Añadir el header Authorization con el token
         val newRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer $token")  // El token de admin
+            .addHeader("Authorization", "Bearer $token")
             .build()
 
         return chain.proceed(newRequest)

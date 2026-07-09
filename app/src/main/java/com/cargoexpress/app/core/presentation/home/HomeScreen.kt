@@ -19,11 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,7 +32,7 @@ import com.cargoexpress.app.core.data.repository.DriverRepository
 import com.cargoexpress.app.core.data.repository.TripRepository
 import com.cargoexpress.app.core.data.repository.VehicleRepository
 import com.cargoexpress.app.core.domain.Trip
-import com.cargoexpress.app.core.presentation.trip.TripStatusChip
+import com.cargoexpress.app.core.presentation.trips.trip.listTrip.TripStatusChip
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Locale

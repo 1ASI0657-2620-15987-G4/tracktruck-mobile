@@ -1,14 +1,11 @@
 package com.cargoexpress.app.core
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,13 +30,13 @@ import com.cargoexpress.app.core.data.repository.RegisterRepository
 import com.cargoexpress.app.core.data.repository.TripRepository
 import com.cargoexpress.app.core.data.repository.UserRepository
 import com.cargoexpress.app.core.data.repository.VehicleRepository
-import com.cargoexpress.app.core.presentation.vehicle.VehicleListViewModel
-import com.cargoexpress.app.core.presentation.login.LoginScreen
-import com.cargoexpress.app.core.presentation.login.LoginViewModel
-import com.cargoexpress.app.core.presentation.register.RegisterScreen
-import com.cargoexpress.app.core.presentation.register.RegisterViewModel
-import com.cargoexpress.app.core.presentation.vehicle.VehicleListScreen
-import com.cargoexpress.app.core.presentation.trip.TripManagementScreen
+import com.cargoexpress.app.core.presentation.fleet.vehicle.VehicleListViewModel
+import com.cargoexpress.app.core.presentation.auth.login.LoginScreen
+import com.cargoexpress.app.core.presentation.auth.login.LoginViewModel
+import com.cargoexpress.app.core.presentation.auth.register.RegisterScreen
+import com.cargoexpress.app.core.presentation.auth.register.RegisterViewModel
+import com.cargoexpress.app.core.presentation.fleet.vehicle.VehicleListScreen
+import com.cargoexpress.app.core.presentation.trips.trip.listTrip.TripManagementScreen
 import com.cargoexpress.app.core.ui.theme.CargoexpressTheme
 import com.cargoexpress.app.core.common.Constants
 import okhttp3.OkHttpClient
@@ -53,7 +50,6 @@ import javax.net.ssl.X509TrustManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DirectionsBusFilled
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.twotone.LocalShipping
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -64,11 +60,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.cargoexpress.app.R
 import com.cargoexpress.app.core.data.remote.alert.AlertService
 import com.cargoexpress.app.core.data.remote.driver.DriverService
 import com.cargoexpress.app.core.data.remote.expense.ExpenseService
@@ -76,48 +70,46 @@ import com.cargoexpress.app.core.data.repository.AlertRepository
 import com.cargoexpress.app.core.data.repository.DriverRepository
 import com.cargoexpress.app.core.data.repository.ExpenseRepository
 import com.cargoexpress.app.core.data.repository.OngoingTripRepository
-import com.cargoexpress.app.core.presentation.alert.AlertScreen
-import com.cargoexpress.app.core.presentation.driver.driverList.DriverListScreen
-import com.cargoexpress.app.core.presentation.driver.driverList.DriverListViewModel
-import com.cargoexpress.app.core.presentation.driver.driverList.registerDriver.RegisterDriverScreen
-import com.cargoexpress.app.core.presentation.driver.driverList.registerDriver.RegisterDriverViewModel
-import com.cargoexpress.app.core.presentation.gps.GpsScreen
+import com.cargoexpress.app.core.presentation.trips.alert.AlertScreen
+import com.cargoexpress.app.core.presentation.fleet.driver.DriverListScreen
+import com.cargoexpress.app.core.presentation.fleet.driver.DriverListViewModel
+import com.cargoexpress.app.core.presentation.fleet.driver.registerDriver.RegisterDriverScreen
+import com.cargoexpress.app.core.presentation.fleet.driver.registerDriver.RegisterDriverViewModel
+import com.cargoexpress.app.core.presentation.trips.gps.GpsScreen
 import com.cargoexpress.app.core.presentation.profile.ProfileScreen
 import com.cargoexpress.app.core.presentation.profile.ProfileViewModel
-import com.cargoexpress.app.core.presentation.trip.detailsTrip.TripDetailScreen
-import com.cargoexpress.app.core.presentation.trip.editTrip.TripEditScreen
-import com.cargoexpress.app.core.presentation.trip.registerExpense.RegisterExpenseScreen
-import com.cargoexpress.app.core.presentation.trip.registerExpense.RegisterExpenseViewModel
+import com.cargoexpress.app.core.presentation.trips.trip.detailsTrip.TripDetailScreen
+import com.cargoexpress.app.core.presentation.trips.trip.editTrip.TripEditScreen
+import com.cargoexpress.app.core.presentation.trips.expense.registerExpense.RegisterExpenseScreen
+import com.cargoexpress.app.core.presentation.trips.expense.registerExpense.RegisterExpenseViewModel
 //import com.cargoexpress.app.core.presentation.record.registerExpense.RegisterExpenseScreen
-import com.cargoexpress.app.core.presentation.trip.registerTrip.RegisterTripScreen
-import com.cargoexpress.app.core.presentation.trip.registerTrip.RegisterTripViewModel
-import com.cargoexpress.app.core.presentation.trip.registerTrip.RegisterTripViewModelFactory
-import com.cargoexpress.app.core.presentation.vehicle.registerVehicle.RegisterVehicleScreen
-import com.cargoexpress.app.core.presentation.vehicle.registerVehicle.RegisterVehicleViewModel
-import com.cargoexpress.app.core.presentation.vehicle.editVehicle.EditVehicleScreen
-import com.cargoexpress.app.core.presentation.vehicle.editVehicle.EditVehicleViewModel
-import com.cargoexpress.app.core.presentation.driver.driverList.editDriver.EditDriverScreen
-import com.cargoexpress.app.core.presentation.driver.driverList.editDriver.EditDriverViewModel
+import com.cargoexpress.app.core.presentation.trips.trip.registerTrip.RegisterTripScreen
+import com.cargoexpress.app.core.presentation.trips.trip.registerTrip.RegisterTripViewModel
+import com.cargoexpress.app.core.presentation.trips.trip.registerTrip.RegisterTripViewModelFactory
+import com.cargoexpress.app.core.presentation.fleet.vehicle.registerVehicle.RegisterVehicleScreen
+import com.cargoexpress.app.core.presentation.fleet.vehicle.registerVehicle.RegisterVehicleViewModel
+import com.cargoexpress.app.core.presentation.fleet.vehicle.editVehicle.EditVehicleScreen
+import com.cargoexpress.app.core.presentation.fleet.vehicle.editVehicle.EditVehicleViewModel
+import com.cargoexpress.app.core.presentation.fleet.driver.editDriver.EditDriverScreen
+import com.cargoexpress.app.core.presentation.fleet.driver.editDriver.EditDriverViewModel
 import com.cargoexpress.app.core.presentation.statistics.StatisticsScreen
-import com.cargoexpress.app.core.presentation.terms.TermsAndConditionsScreen
+import com.cargoexpress.app.core.presentation.auth.register.TermsAndConditionsScreen
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.cargoexpress.app.core.data.remote.auditlog.AuditLogService
 import com.cargoexpress.app.core.data.repository.AuditLogRepository
 import com.cargoexpress.app.core.presentation.home.HomeScreen
-import com.cargoexpress.app.core.presentation.trip.editExpense.EditExpenseScreen
-import com.cargoexpress.app.core.presentation.trip.editExpense.EditExpenseViewModel
-import com.cargoexpress.app.core.presentation.trip.editExpense.EditExpenseViewModelFactory
+import com.cargoexpress.app.core.presentation.trips.expense.editExpense.EditExpenseScreen
+import com.cargoexpress.app.core.presentation.trips.expense.editExpense.EditExpenseViewModel
+import com.cargoexpress.app.core.presentation.trips.expense.editExpense.EditExpenseViewModelFactory
 import com.cargoexpress.app.core.presentation.fleet.FleetScreen
 import com.cargoexpress.app.core.presentation.history.HistoryScreen
 import com.cargoexpress.app.core.presentation.history.HistoryDetailScreen
@@ -170,7 +162,6 @@ class MainActivity : ComponentActivity() {
         val alertService = buildService(AlertService::class.java)
         val auditLogService = buildService(AuditLogService::class.java)
 
-        val tripRepository = TripRepository(tripService, expenseService)
         val clientRepository = ClientRepository(clientService)
         val auditLogRepository = AuditLogRepository(auditLogService)
 
@@ -402,7 +393,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "register_expense/{tripId}") { backStackEntry ->
-                            val tripId = backStackEntry.arguments?.getString("tripId")?.toInt() ?: 0
                             val registerExpenseViewModel = RegisterExpenseViewModel(expenseRepository)
                             RegisterExpenseScreen(viewModel = registerExpenseViewModel, navController = navController) { expense ->
 
@@ -422,7 +412,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "register_driver") { backStackEntry ->
-                            val token = backStackEntry.arguments?.getString("token") ?: ""
                             val registerDriverViewModel = RegisterDriverViewModel(driverRepository)
                             RegisterDriverScreen(viewModel = registerDriverViewModel, navController = navController) { driver ->
 
@@ -430,7 +419,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "register_vehicle") { backStackEntry ->
-                            val token = backStackEntry.arguments?.getString("token") ?: ""
                             val registerVehicleViewModel = RegisterVehicleViewModel(vehicleRepository)
                             RegisterVehicleScreen(viewModel = registerVehicleViewModel, navController = navController) { vehicle ->
 
@@ -450,7 +438,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "register_trip") { backStackEntry ->
-                            val token = backStackEntry.arguments?.getString("token") ?: ""
                             val registerTripViewModel: RegisterTripViewModel = viewModel(
                                 factory = RegisterTripViewModelFactory(
                                     tripRepository = tripRepository,
