@@ -346,7 +346,7 @@ fun RegisterDriverScreen(
                     dni = ""
                     license = ""
                     contactNumber = ""
-                    navController.navigate("drivers")
+                    navController.popBackStack()
                 }
             },
             onDismiss = { showConfirmModal = false }

@@ -156,7 +156,7 @@ fun RegisterExpenseScreen(
                             val filtered = input.filter { it.isDigit() || it == '.' }
                             if (filtered.isEmpty() || isDecimalValid(filtered)) fuelAmount = filtered
                         },
-                        label = { Text("Monto Combustible (USD)") },
+                        label = { Text("Monto Combustible (S/.)") },
                         isError = fuelAmount.isNotBlank() && !isFuelAmountValid,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
@@ -201,7 +201,7 @@ fun RegisterExpenseScreen(
                             val filtered = input.filter { it.isDigit() || it == '.' }
                             if (filtered.isEmpty() || isDecimalValid(filtered)) viaticsAmount = filtered
                         },
-                        label = { Text("Monto Viáticos (USD)") },
+                        label = { Text("Monto Viáticos (S/.)") },
                         isError = viaticsAmount.isNotBlank() && !isViaticsAmountValid,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
@@ -246,7 +246,7 @@ fun RegisterExpenseScreen(
                             val filtered = input.filter { it.isDigit() || it == '.' }
                             if (filtered.isEmpty() || isDecimalValid(filtered)) tollsAmount = filtered
                         },
-                        label = { Text("Monto Peajes (USD)") },
+                        label = { Text("Monto Peajes (S/.)") },
                         isError = tollsAmount.isNotBlank() && !isTollsAmountValid,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),

@@ -125,7 +125,7 @@ fun StatisticsScreen(tripRepository: TripRepository) {
                             iconBg = Color(0xFFE8F5E9),
                             iconTint = Color(0xFF2E7D32),
                             label = "Total gastos",
-                            value = "$ ${"%,.2f".format(totalExpenses)}"
+                            value = "S/. ${"%,.2f".format(totalExpenses)}"
                         )
                     }
 

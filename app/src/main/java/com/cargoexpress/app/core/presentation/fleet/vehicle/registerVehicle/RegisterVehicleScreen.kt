@@ -412,7 +412,7 @@ fun RegisterVehicleScreen(
                     tractorTouched = false
                     maxLoadTouched = false
                     volumeTouched = false
-                    navController.navigate("vehicles")
+                    navController.popBackStack()
                 }
             },
             onDismiss = { showConfirmModal = false }
