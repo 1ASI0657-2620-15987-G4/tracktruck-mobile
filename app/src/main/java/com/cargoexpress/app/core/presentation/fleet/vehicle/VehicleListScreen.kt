@@ -173,12 +173,15 @@ fun VehicleListScreen(viewModel: VehicleListViewModel, navController: NavControl
                 FilterChip(
                     selected = true,
                     onClick = { sortAscending = !sortAscending },
-                    label = { Text((if (sortAscending) "↑ A-Z" else "↓ Z-A"), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp) ) },
+                    label = { Text((if (sortAscending) "↑ A-Z" else "↓ Z-A"),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                        color = Color.Black) },
                     leadingIcon = {
                         Icon(
                             if (sortAscending) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.Black
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(
@@ -199,7 +202,13 @@ fun VehicleListScreen(viewModel: VehicleListViewModel, navController: NavControl
                     FilterChip(
                         selected = selectedState == s,
                         onClick = { selectedState = s },
-                        label = { Text((stateLabels[s] ?: s), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp) ) },
+                        label = {
+                            Text(
+                                (stateLabels[s] ?: s),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                                color = if (selectedState == s) Color.Black else Color.Gray
+                            )
+                        },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Color(0xFFFFEB3B)
                         )

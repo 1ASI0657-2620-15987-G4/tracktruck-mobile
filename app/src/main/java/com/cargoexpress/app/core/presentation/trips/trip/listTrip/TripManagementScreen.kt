@@ -159,12 +159,15 @@ fun TripManagementScreen(
                 FilterChip(
                     selected = true,
                     onClick = { sortAscending = !sortAscending },
-                    label = { Text((if (sortAscending) "↑ A-Z" else "↓ Z-A"), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp))},
+                    label = { Text((if (sortAscending) "↑ A-Z" else "↓ Z-A"),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                        color = Color.Black)},
                     leadingIcon = {
                         Icon(
                             if (sortAscending) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.Black
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(
@@ -268,7 +271,8 @@ fun TripManagementScreen(
                         onClick = { selectedStatus = status },
                         label = { Text(status, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp)) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFFFEB3B)
+                            selectedContainerColor = Color(0xFFFFEB3B),
+                            selectedLabelColor = Color.Black
                         ),
 
                     )

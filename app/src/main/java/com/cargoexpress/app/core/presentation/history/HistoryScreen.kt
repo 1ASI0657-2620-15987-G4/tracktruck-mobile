@@ -163,6 +163,7 @@ fun HistoryScreen(
                     label = {
                         Text(
                             if (sortNewestFirst) "↓ Reciente" else "↑ Antiguo",
+                            color = Color.Black,
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 11.sp)
                         )
                     },
@@ -184,7 +185,9 @@ fun HistoryScreen(
                     selected = selectedAction == value,
                     onClick = { selectedAction = value },
                     label = { Text(label, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp)) },
-                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFEB3B))
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFFFEB3B),
+                        selectedLabelColor = Color.Black)
                 )
             }
         }
@@ -202,7 +205,9 @@ fun HistoryScreen(
                     selected = selectedEntity == value,
                     onClick = { selectedEntity = value },
                     label = { Text(label, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp)) },
-                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFEB3B))
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFFFEB3B),
+                        selectedLabelColor = Color.Black)
                 )
             }
         }
