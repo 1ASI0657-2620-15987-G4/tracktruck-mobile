@@ -8,6 +8,7 @@ sealed class Routes(val routes: String) {
     data object TripList: Routes("TripList")
     data object Profile: Routes("Profile")
     data object TermsAndConditions: Routes("TermsAndConditions")
+    data object PrivacyPolicy: Routes("PrivacyPolicy")
     data object Home: Routes("home")
     data object Fleet: Routes("fleet")
     data object History: Routes("history")

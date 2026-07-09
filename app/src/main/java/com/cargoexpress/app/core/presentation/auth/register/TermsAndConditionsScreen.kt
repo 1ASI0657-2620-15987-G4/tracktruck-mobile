@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,12 @@ fun TermsAndConditionsScreen(navController: NavController) {
             Text(
                 text = "CargoExpress",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Fecha de modificación: 15 de Junio del 2026",
+                fontSize = 12.sp,
+                color = Color.Gray,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 

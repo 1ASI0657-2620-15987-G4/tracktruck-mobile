@@ -94,6 +94,7 @@ import com.cargoexpress.app.core.presentation.fleet.driver.editDriver.EditDriver
 import com.cargoexpress.app.core.presentation.fleet.driver.editDriver.EditDriverViewModel
 import com.cargoexpress.app.core.presentation.statistics.StatisticsScreen
 import com.cargoexpress.app.core.presentation.auth.register.TermsAndConditionsScreen
+import com.cargoexpress.app.core.presentation.auth.register.PrivacyPolicyScreen
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -204,7 +205,7 @@ class MainActivity : ComponentActivity() {
                 val entrepreneurRepository = EntrepreneurRepository(entrepreneurService)
                 val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
                 val currentRoute = navController.currentBackStackEntry?.destination?.route
-                val isGpsOrAlert = currentRoute == "gps/{tripId}" || currentRoute == "alert/{tripId}" || currentRoute == Routes.TermsAndConditions.routes || currentRoute == "history_detail"
+                val isGpsOrAlert = currentRoute == "gps/{tripId}" || currentRoute == "alert/{tripId}" || currentRoute == Routes.TermsAndConditions.routes || currentRoute == Routes.PrivacyPolicy.routes || currentRoute == "history_detail"
                 val isRegisterOrEditScreen = currentRoute == "register_trip" ||
                     currentRoute == "edit_trip/{tripId}" ||
                     currentRoute == "register_vehicle" ||
@@ -502,6 +503,10 @@ class MainActivity : ComponentActivity() {
 
                         composable(route = Routes.TermsAndConditions.routes) {
                             TermsAndConditionsScreen(navController)
+                        }
+
+                        composable(route = Routes.PrivacyPolicy.routes) {
+                            PrivacyPolicyScreen(navController)
                         }
                     }
                 }

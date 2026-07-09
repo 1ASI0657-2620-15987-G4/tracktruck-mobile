@@ -1,6 +1,7 @@
 package com.cargoexpress.app.core.presentation.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cargoexpress.app.core.common.Constants
+import com.cargoexpress.app.core.common.Routes
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel, navController: NavController) {
@@ -278,6 +282,28 @@ fun ProfileScreen(viewModel: ProfileViewModel, navController: NavController) {
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Términos y Condiciones",
+                color = Color(0xFF999900),
+                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate(Routes.TermsAndConditions.routes) },
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Política de Privacidad",
+                color = Color(0xFF999900),
+                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate(Routes.PrivacyPolicy.routes) },
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

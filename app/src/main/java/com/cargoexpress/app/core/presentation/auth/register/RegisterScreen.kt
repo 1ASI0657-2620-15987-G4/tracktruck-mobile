@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,18 +42,20 @@ fun RegisterScreen(
 ) {
     val state by viewModel.state.observeAsState(UIState())
 
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var rawPhone by remember { mutableStateOf("") }
-    var dni by remember { mutableStateOf("") }
-    var ruc by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var birthDateDisplay by remember { mutableStateOf("") }
-    var showPassword by remember { mutableStateOf(false) }
-    var isClient by remember { mutableStateOf(true) }
+    var username by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var phone by rememberSaveable { mutableStateOf("") }
+    var rawPhone by rememberSaveable { mutableStateOf("") }
+    var dni by rememberSaveable { mutableStateOf("") }
+    var ruc by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
+    var birthDate by rememberSaveable { mutableStateOf("") }
+    var birthDateDisplay by rememberSaveable { mutableStateOf("") }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
+    var isClient by rememberSaveable { mutableStateOf(true) }
+    var termsAccepted by rememberSaveable { mutableStateOf(false) }
+    var privacyAccepted by rememberSaveable { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showConfirmModal by remember { mutableStateOf(false) }
     var confirmModalSuccess by remember { mutableStateOf(false) }
@@ -84,7 +87,9 @@ fun RegisterScreen(
             isNameValid &&
             isPhoneValid &&
             idFieldValid &&
-            extraFieldValid
+            extraFieldValid &&
+            termsAccepted &&
+            privacyAccepted
 
     LaunchedEffect(state.message) {
         if (state.message.isNotEmpty()) {
@@ -137,6 +142,49 @@ fun RegisterScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = termsAccepted,
+                            onCheckedChange = { termsAccepted = it },
+                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFFE4D911))
+                        )
+                        Text(
+                            text = "Acepto los ",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Términos y Condiciones",
+                            color = Color(0xFFE4D911),
+                            style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
+                            modifier = Modifier.clickable { navController.navigate(Routes.TermsAndConditions.routes) }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = privacyAccepted,
+                            onCheckedChange = { privacyAccepted = it },
+                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFFE4D911))
+                        )
+                        Text(
+                            text = "Acepto la ",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Política de Privacidad",
+                            color = Color(0xFFE4D911),
+                            style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
+                            modifier = Modifier.clickable { navController.navigate(Routes.PrivacyPolicy.routes) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
                             if (isClient) {
@@ -156,16 +204,6 @@ fun RegisterScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Términos y Condiciones",
-                        color = Color(0xFFE4D911),
-                        style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { navController.navigate(Routes.TermsAndConditions.routes) },
-                        textAlign = TextAlign.Center
-                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = buildAnnotatedString {
