@@ -1,0 +1,16 @@
+package com.tracktruck.app.core.common
+
+import com.tracktruck.app.BuildConfig
+
+object Constants {
+    const val BASE_URL = BuildConfig.API_BASE_URL
+    var TOKEN: String = ""
+    var USER_ID: Int = 0
+    var USER_NAME: String = ""
+    var PROFILE_NAME: String = ""
+    var USER_PHONE: String = ""
+    var USER_ROLE: String = ""
+    var ENTREPRENEUR_ID: Int = 0
+    var CLIENT_ID: Int = 0
+    var TRIP_ID: Int = 0
+}
