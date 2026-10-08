@@ -1,0 +1,70 @@
+package com.tracktruck.app.core.presentation.trips.trip.listTrip
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tracktruck.app.core.data.repository.OngoingTripRepository
+import com.tracktruck.app.core.data.repository.TripRepository
+import com.tracktruck.app.core.domain.OngoingTrip
+import com.tracktruck.app.core.domain.Trip
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import com.tracktruck.app.core.common.Constants
+import com.tracktruck.app.core.common.Resource
+import com.tracktruck.app.core.common.UIState
+
+class TripManagementViewModel(
+    private val tripRepository: TripRepository,
+    private val ongoingTripRepository: OngoingTripRepository) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(UIState<List<Trip>>(isLoading = true))
+    val uiState: StateFlow<UIState<List<Trip>>> = _uiState
+
+    private var allTrips: List<Trip> = emptyList()
+    private var allOngoingTrips: List<OngoingTrip> = emptyList()
+
+    private val _ongoingTrips = MutableStateFlow<List<OngoingTrip>>(emptyList())
+    val ongoingTrips: StateFlow<List<OngoingTrip>> = _ongoingTrips
+
+    init {
+        loadTrips()
+    }
+
+    fun loadTrips() {
+        viewModelScope.launch {
+            _uiState.value = UIState(isLoading = true)
+            val result = if (Constants.USER_ROLE == "CLIENT") {
+                tripRepository.getTripsByClientId(Constants.TOKEN, Constants.CLIENT_ID)
+            } else {
+                tripRepository.getTrips(Constants.TOKEN, Constants.ENTREPRENEUR_ID)
+            }
+            _uiState.value = when (result) {
+                is Resource.Success -> {
+                    allTrips = result.data ?: emptyList()
+                    UIState(data = allTrips, isLoading = false)
+                }
+                is Resource.Error -> UIState(isLoading = false, message = result.message ?: "Failed to load trips")
+            }
+        }
+    }
+
+    fun loadOngoingTrips(token: String) {
+        viewModelScope.launch {
+            val result = ongoingTripRepository.getOngoingTrips(token)
+            if (result is Resource.Success) {
+                allOngoingTrips = result.data ?: emptyList()
+                _ongoingTrips.value = allOngoingTrips
+            } else {
+                handleError(Exception(result.message))
+            }
+        }
+    }
+    fun getOngoingTripById(tripId: Int): OngoingTrip? {
+        return allOngoingTrips.find { it.tripId == tripId }
+    }
+
+    fun handleError(exception: Exception) {
+        val message = exception.message ?: "Unknown error"
+        _uiState.value = UIState(isLoading = false, message = "Error: $message")
+    }
+}

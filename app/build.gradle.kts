@@ -1,22 +1,28 @@
-import org.gradle.kotlin.dsl.test
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services)
+    alias(libs.plugins.google.services) apply false
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
+val trackTruckApiBaseUrl = providers.gradleProperty("TRACKTRUCK_API_BASE_URL")
+    .orElse("http://10.0.2.2:8080/api/v1/")
+
 android {
-    namespace = "com.cargoexpress.app"
+    namespace = "com.tracktruck.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.cargoexpress.app"
+        applicationId = "com.tracktruck.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "API_BASE_URL", "\"${trackTruckApiBaseUrl.get()}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,6 +47,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {

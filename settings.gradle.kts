@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "cargoexpress"
+rootProject.name = "tracktruck"
 include(":app")
  

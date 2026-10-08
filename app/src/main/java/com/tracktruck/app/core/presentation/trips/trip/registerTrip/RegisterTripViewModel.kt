@@ -1,0 +1,71 @@
+package com.tracktruck.app.core.presentation.trips.trip.registerTrip
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tracktruck.app.core.data.remote.user.ClientDto
+import com.tracktruck.app.core.data.repository.ClientRepository
+import com.tracktruck.app.core.data.repository.TripRepository
+import com.tracktruck.app.core.data.repository.DriverRepository
+import com.tracktruck.app.core.data.repository.VehicleRepository
+import com.tracktruck.app.core.domain.Trip
+import kotlinx.coroutines.launch
+import com.tracktruck.app.core.common.Constants
+import com.tracktruck.app.core.common.Resource
+import com.tracktruck.app.core.domain.Driver
+import com.tracktruck.app.core.domain.Vehicle
+
+class RegisterTripViewModel(
+    private val tripRepository: TripRepository,
+    private val driverRepository: DriverRepository,
+    private val vehicleRepository: VehicleRepository,
+    private val clientRepository: ClientRepository
+) : ViewModel() {
+    var name: String = ""
+    var type: String = ""
+    var weight: Double = 0.0
+    var loadLocation: String = ""
+    var loadDate: String = ""
+    var unloadLocation: String = ""
+    var unloadDate: String = ""
+    var driverId: Int = 0
+    var vehicleId: Int = 0
+    var clientId: Int = 0
+
+    fun registerTrip(onResult: (Resource<Trip>) -> Unit) {
+        viewModelScope.launch {
+            val trip = Trip(
+                id = 0,
+                name = name,
+                state = "",
+                type = type,
+                weight = weight,
+                loadLocation = loadLocation,
+                loadDate = loadDate,
+                unloadLocation = unloadLocation,
+                unloadDate = unloadDate,
+                driverId = driverId,
+                vehicleId = vehicleId,
+                clientId = clientId,
+                entrepreneurId = Constants.ENTREPRENEUR_ID
+            )
+            val result = tripRepository.addTrip(trip)
+            if (result is Resource.Success) {
+                driverRepository.updateDriverState(driverId, "UNAVAILABLE")
+                vehicleRepository.updateVehicleState(vehicleId, "UNAVAILABLE")
+            }
+            onResult(result)
+        }
+    }
+
+    suspend fun getDrivers(entrepreneurId: Int): Resource<List<Driver>> {
+        return driverRepository.getDrivers(Constants.TOKEN, entrepreneurId)
+    }
+
+    suspend fun getVehicles(entrepreneurId: Int): Resource<List<Vehicle>> {
+        return vehicleRepository.getVehicleList(Constants.TOKEN, entrepreneurId)
+    }
+
+    suspend fun validateClientDni(dni: String): Result<ClientDto> {
+        return clientRepository.getClientByDni(dni, Constants.TOKEN)
+    }
+}

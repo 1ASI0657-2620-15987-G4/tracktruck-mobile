@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew test
 
 # Run a single unit test class
-./gradlew test --tests "com.cargoexpress.app.ExampleUnitTest"
+./gradlew test --tests "com.tracktruck.app.ExampleUnitTest"
 
 # Run instrumented tests (requires connected device/emulator)
 ./gradlew connectedAndroidTest
@@ -78,7 +78,7 @@ Login is a two-step process: credentials → phone OTP.
 
 ### API
 
-Base URL: `https://cargoexpress-backend-production.up.railway.app/api/v1/`
+Base URL: `https://tracktruck-backend-production.up.railway.app/api/v1/`
 
 Authentication uses `Bearer ${Constants.TOKEN}` passed as a header parameter on individual repository calls. `AuthInterceptor` exists but is not wired into any Retrofit instance yet.
 
