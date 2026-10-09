@@ -1,0 +1,436 @@
+package com.tracktruck.app.core.presentation.fleet.vehicle
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.tracktruck.app.core.common.Constants
+import com.tracktruck.app.core.common.Resource
+import com.tracktruck.app.core.domain.Vehicle
+import com.tracktruck.app.core.presentation.common.ConfirmationModal
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VehicleListScreen(viewModel: VehicleListViewModel, navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
+    var appliedQuery by remember { mutableStateOf("") }
+    var sortAscending by remember { mutableStateOf(true) }
+    var selectedState by remember { mutableStateOf("AVAILABLE") }
+
+    var pendingVehicle by remember { mutableStateOf<Vehicle?>(null) }
+    var pendingNewState by remember { mutableStateOf("") }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var showResultModal by remember { mutableStateOf(false) }
+    var resultSuccess by remember { mutableStateOf(false) }
+    var resultMessage by remember { mutableStateOf("") }
+
+    val stateOptions = listOf("AVAILABLE", "UNAVAILABLE", "INACTIVE")
+    val stateLabels = mapOf("AVAILABLE" to "DISPONIBLE", "UNAVAILABLE" to "NO DISPONIBLE", "INACTIVE" to "INACTIVO")
+
+    val state by viewModel.state
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        if (navBackStackEntry?.destination?.route == "vehicles") {
+            viewModel.getVehiclesForEntrepreneur(
+                entrepreneurId = Constants.ENTREPRENEUR_ID,
+                token = Constants.TOKEN
+            )
+        }
+    }
+
+    if (showConfirmDialog && pendingVehicle != null) {
+        val isDeactivating = pendingNewState == "INACTIVE"
+        AlertDialog(
+            onDismissRequest = {
+                showConfirmDialog = false
+                pendingVehicle = null
+            },
+            title = { Text(if (isDeactivating) "Desactivar vehículo" else "Restaurar vehículo") },
+            text = {
+                Text(
+                    if (isDeactivating)
+                        "¿Estás seguro de que deseas desactivar \"${pendingVehicle?.name}\"? Podrás restaurarlo más adelante."
+                    else
+                        "¿Estás seguro de que deseas restaurar \"${pendingVehicle?.name}\"? Quedará disponible nuevamente."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val vehicle = pendingVehicle ?: return@Button
+                        showConfirmDialog = false
+                        viewModel.updateVehicleState(vehicle.id, pendingNewState) { result ->
+                            resultSuccess = result is Resource.Success
+                            resultMessage = if (result is Resource.Success)
+                                if (isDeactivating) "Vehículo desactivado correctamente"
+                                else "Vehículo restaurado correctamente"
+                            else
+                                (result as? Resource.Error)?.message ?: "Error al actualizar el estado"
+                            showResultModal = true
+                        }
+                        pendingVehicle = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDeactivating) Color(0xFFE65100) else Color(0xFF2E7D32)
+                    )
+                ) { Text(if (isDeactivating) "Desactivar" else "Restaurar", color = Color.White) }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = {
+                    showConfirmDialog = false
+                    pendingVehicle = null
+                }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    if (showResultModal) {
+        ConfirmationModal(
+            isSuccess = resultSuccess,
+            message = resultMessage,
+            onConfirm = {
+                showResultModal = false
+                viewModel.getVehiclesForEntrepreneur(
+                    entrepreneurId = Constants.ENTREPRENEUR_ID,
+                    token = Constants.TOKEN
+                )
+            },
+            onDismiss = { showResultModal = false }
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Text(
+                    text = "MIS VEHÍCULOS",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Buscar vehículo") },
+                    leadingIcon = { Icon(Icons.Filled.DirectionsCar, contentDescription = null) },
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = { appliedQuery = searchQuery },
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFFFEB3B))
+                ) {
+                    Icon(Icons.Filled.Search, contentDescription = "Buscar", tint = Color.Black)
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterChip(
+                    selected = true,
+                    onClick = { sortAscending = !sortAscending },
+                    label = { Text((if (sortAscending) "↑ A-Z" else "↓ Z-A"),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                        color = Color.Black) },
+                    leadingIcon = {
+                        Icon(
+                            if (sortAscending) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.Black
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFFFEB3B)
+                    )
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                stateOptions.forEach { s ->
+                    FilterChip(
+                        selected = selectedState == s,
+                        onClick = { selectedState = s },
+                        label = {
+                            Text(
+                                (stateLabels[s] ?: s),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                                color = if (selectedState == s) Color.Black else Color.Gray
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFFFEB3B)
+                        )
+                    )
+                }
+            }
+
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFFFEB3B))
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val filtered = state.data?.filter { vehicle ->
+                    val nameMatch = appliedQuery.isBlank() || vehicle.name.contains(appliedQuery, ignoreCase = true)
+                    vehicle.state == selectedState && nameMatch
+                } ?: emptyList()
+
+                val sorted = if (sortAscending) filtered.sortedBy { it.name.lowercase() }
+                             else filtered.sortedByDescending { it.name.lowercase() }
+
+                if (sorted.isEmpty() && !state.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center
+                        ){
+                            Text(
+                                text = "No se encontraron vehiculos\nTodo quieto por ahora",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    items(sorted.size) { index ->
+                        val vehicle = sorted[index]
+                        VehicleItem(
+                            vehicle = vehicle,
+                            onEditClick = if (vehicle.state == "AVAILABLE") {
+                                { navController.navigate("edit_vehicle/${vehicle.id}") }
+                            } else null,
+                            onStateChangeClick = {
+                                pendingVehicle = vehicle
+                                pendingNewState = if (vehicle.state == "INACTIVE") "AVAILABLE" else "INACTIVE"
+                                showConfirmDialog = true
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        FloatingActionButton(
+            onClick = { navController.navigate("register_vehicle") },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            containerColor = Color(0xFFFFEB3B)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Agregar vehículo", tint = Color.Black)
+        }
+    }
+}
+
+@Composable
+fun VehicleItem(
+    vehicle: Vehicle,
+    onEditClick: (() -> Unit)?,
+    onStateChangeClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.size(40.dp).background(Color(0xFFFFF8E1), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.DirectionsCar,
+                        contentDescription = null,
+                        tint = Color(0xFFF9A825),
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = vehicle.name,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = vehicle.model,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                VehicleStateBadge(vehicle.state)
+                Spacer(modifier = Modifier.width(4.dp))
+                if (onEditClick != null) {
+                    IconButton(onClick = onEditClick, modifier = Modifier.size(36.dp)) {
+                        Icon(imageVector = Icons.Filled.Edit, contentDescription = "Editar vehículo", tint = Color(0xFFF9A825))
+                    }
+                }
+                if (vehicle.state == "AVAILABLE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Desactivar vehículo",
+                            tint = Color(0xFFE65100)
+                        )
+                    }
+                } else if (vehicle.state == "INACTIVE") {
+                    IconButton(onClick = onStateChangeClick, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Reactivar vehículo",
+                            tint = Color(0xFF2E7D32)
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                VehicleInfoItem(
+                    icon = Icons.Filled.Info,
+                    label = "Placa",
+                    value = vehicle.plate,
+                    modifier = Modifier.weight(1f)
+                )
+                VehicleInfoItem(
+                    icon = Icons.Filled.LocalShipping,
+                    label = "Placa tractor",
+                    value = vehicle.tractorPlate,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                VehicleInfoItem(
+                    icon = Icons.Filled.Scale,
+                    label = "Carga máxima",
+                    value = "${vehicle.maxLoad} kg",
+                    modifier = Modifier.weight(1f)
+                )
+                VehicleInfoItem(
+                    icon = Icons.Filled.ViewWeek,
+                    label = "Volumen",
+                    value = "${vehicle.volume} m³",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun VehicleStateBadge(state: String) {
+    val (bgColor, textColor) = when (state) {
+        "AVAILABLE" -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
+        "UNAVAILABLE" -> Color(0xFFFFF3E0) to Color(0xFFE65100)
+        else -> Color(0xFFEEEEEE) to Color(0xFF616161)
+    }
+    val displayText = when (state) {
+        "AVAILABLE" -> "DISPONIBLE"
+        "UNAVAILABLE" -> "NO DISPONIBLE"
+        else -> "INACTIVO"
+    }
+    Surface(shape = RoundedCornerShape(8.dp), color = bgColor) {
+        Text(
+            text = displayText,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun VehicleInfoItem(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(text = label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = value, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurface)
+        }
+    }
+}
